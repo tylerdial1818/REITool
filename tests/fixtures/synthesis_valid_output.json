@@ -1,0 +1,56 @@
+{
+  "input_address": "30 Rockefeller Plaza, New York, NY 10112",
+  "resolved_address": "30 ROCKEFELLER PLZ, NEW YORK, NY, 10112",
+  "coordinates": {
+    "lat": 40.758896,
+    "lon": -73.978674
+  },
+  "sections": {
+    "risk": {
+      "flood_zone": "X",
+      "flood_zone_description": "Minimal flood risk. Zone X is outside the 100-year and 500-year floodplains.",
+      "risk_score": 2,
+      "risk_flags": ["High-value commercial corridor"]
+    },
+    "price": {
+      "assessed_value": 382500000,
+      "full_market_value": 850000000,
+      "price_per_sqft": 1000.0,
+      "equalization_note": "New York County equalization rate is 45.00%. Assessed value reflects this discount from full market value."
+    },
+    "location_quality": {
+      "median_household_income": 85000,
+      "vacancy_rate": 0.0865,
+      "renter_pct": 0.76,
+      "population_trend": "Stable population with slight growth in recent Census periods.",
+      "block_group_geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-73.982, 40.762], [-73.975, 40.762], [-73.975, 40.755], [-73.982, 40.755], [-73.982, 40.762]]]
+      }
+    },
+    "market_context": {
+      "county": "New York",
+      "total_employment": 2850000,
+      "employment_trend": "Employment grew 3.3% year-over-year, indicating strengthening labor market demand.",
+      "dominant_industries": ["Finance and Insurance", "Professional Services", "Information"]
+    }
+  },
+  "property_facts": {
+    "property_class": "410 - Living accomodations",
+    "year_built": 1933,
+    "lot_size_sqft": 85000.0,
+    "building_sqft": 850000.0,
+    "parcel_geometry": {
+      "type": "Polygon",
+      "coordinates": [[[-73.9793, 40.7593], [-73.9783, 40.7593], [-73.9783, 40.7585], [-73.9793, 40.7585], [-73.9793, 40.7593]]]
+    }
+  },
+  "narrative": "30 Rockefeller Plaza is a landmark 1933-vintage commercial property in Midtown Manhattan with a full market value of $850M. The surrounding block group shows a median household income of $85,000 with moderate vacancy at 8.7%. Employment in New York County grew 3.3% YoY, signaling robust commercial demand. Flood risk is minimal (Zone X).",
+  "talking_points": [
+    "The property's $850M market value reflects its Midtown Manhattan location and 850,000 SF footprint.",
+    "Employment in the county grew 3.3% year-over-year, supporting tenant demand for commercial space.",
+    "Minimal flood risk (Zone X) reduces insurance costs and long-term environmental liability.",
+    "The 45% equalization rate means assessed value significantly discounts market value for tax purposes.",
+    "High renter concentration (76%) in the surrounding area indicates strong demand for commercial and residential space."
+  ]
+}

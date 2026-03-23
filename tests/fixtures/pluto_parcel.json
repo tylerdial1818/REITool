@@ -1,0 +1,37 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "bbl": "1012770001",
+        "borough": "MN",
+        "block": "01277",
+        "lot": "0001",
+        "address": "30 ROCKEFELLER PLZ",
+        "zonedist1": "C5-3",
+        "bldgclass": "O4",
+        "landuse": "05",
+        "ownername": "ROCKEFELLER CENTER INC",
+        "lotarea": 85000,
+        "bldgarea": 850000,
+        "numfloors": 70,
+        "yearbuilt": 1933,
+        "assesstot": 382500000,
+        "assessland": 127500000
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.9793, 40.7593],
+            [-73.9783, 40.7593],
+            [-73.9783, 40.7585],
+            [-73.9793, 40.7585],
+            [-73.9793, 40.7593]
+          ]
+        ]
+      }
+    }
+  ]
+}

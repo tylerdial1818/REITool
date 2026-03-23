@@ -1,0 +1,32 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "GEOID": "360610076001",
+        "STATE": "36",
+        "COUNTY": "061",
+        "TRACT": "007600",
+        "BLKGRP": "1",
+        "ALAND": 123456,
+        "AWATER": 0,
+        "BASENAME": "1",
+        "NAME": "Block Group 1",
+        "FUNCSTAT": "S"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.982, 40.762],
+            [-73.975, 40.762],
+            [-73.975, 40.755],
+            [-73.982, 40.755],
+            [-73.982, 40.762]
+          ]
+        ]
+      }
+    }
+  ]
+}

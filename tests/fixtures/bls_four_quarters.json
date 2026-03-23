@@ -1,0 +1,42 @@
+{
+  "status": "REQUEST_SUCCEEDED",
+  "responseTime": 42,
+  "message": [],
+  "Results": {
+    "series": [
+      {
+        "seriesID": "ENU3606110",
+        "data": [
+          {
+            "year": "2025",
+            "period": "Q1",
+            "periodName": "1st Quarter",
+            "value": "2850000",
+            "footnotes": [{}]
+          },
+          {
+            "year": "2024",
+            "period": "Q4",
+            "periodName": "4th Quarter",
+            "value": "2820000",
+            "footnotes": [{}]
+          },
+          {
+            "year": "2024",
+            "period": "Q3",
+            "periodName": "3rd Quarter",
+            "value": "2790000",
+            "footnotes": [{}]
+          },
+          {
+            "year": "2024",
+            "period": "Q2",
+            "periodName": "2nd Quarter",
+            "value": "2760000",
+            "footnotes": [{}]
+          }
+        ]
+      }
+    ]
+  }
+}
