@@ -5,6 +5,7 @@ import logging
 
 import httpx
 from fastapi import APIRouter, HTTPException
+from pydantic import ValidationError
 
 from app.fetchers.bls import fetch_bls
 from app.fetchers.census_acs import fetch_census_acs
@@ -13,7 +14,9 @@ from app.fetchers.geocoder import fetch_geocode
 from app.fetchers.orpts import fetch_orpts
 from app.fetchers.pluto import fetch_pluto
 from app.fetchers.tiger import fetch_tiger
+from app.monitoring.hallucination import detect_hallucinations
 from app.schemas.input import AddressInput
+from app.schemas.output import BriefingOutput
 from app.synthesis.claude import synthesize_briefing
 
 router = APIRouter()
@@ -84,8 +87,32 @@ async def analyze(payload: AddressInput):
         logger.error("Synthesis failed: %s", e)
         raise HTTPException(500, detail=f"Synthesis failed: {str(e)}")
 
-    # Step 5: Return — add input_address and coordinates
-    briefing["input_address"] = payload.address
-    briefing["resolved_address"] = resolved
-    briefing["coordinates"] = {"lat": lat, "lon": lon}
-    return briefing
+    # Step 5: Hallucination detection
+    hal_warnings = detect_hallucinations(context, briefing)
+    for w in hal_warnings:
+        logger.warning("Hallucination detected: %s", w)
+
+    # Step 6: Validate output against BriefingOutput schema
+    try:
+        output = BriefingOutput(
+            input_address=payload.address,
+            resolved_address=resolved,
+            coordinates={"lat": lat, "lon": lon},
+            sections={
+                "risk": briefing.get("risk", {}),
+                "price": briefing.get("price", {}),
+                "location_quality": briefing.get("location_quality", {}),
+                "market_context": briefing.get("market_context", {}),
+            },
+            property_facts=briefing.get("property_facts", {}),
+            narrative=briefing.get("narrative", ""),
+            talking_points=briefing.get("talking_points", []),
+        )
+    except ValidationError as e:
+        logger.error("BriefingOutput validation failed: %s", e)
+        raise HTTPException(500, detail="Synthesis output did not match expected schema")
+
+    result = output.model_dump()
+    if hal_warnings:
+        result["_hallucination_warnings"] = hal_warnings
+    return result

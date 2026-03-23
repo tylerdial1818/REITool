@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REITool — NY Property Intelligence</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root {
+      --bg:           #F5F7FA;
+      --surface:      #FFFFFF;
+      --card:         #FFFFFF;
+      --border:       #E2E8F0;
+      --border-hi:    #CBD5E1;
+      --blue:         #2563EB;
+      --blue-bg:      rgba(37,99,235,0.07);
+      --blue-border:  rgba(37,99,235,0.22);
+      --blue-dark:    #1D4ED8;
+      --text-1:       #0F172A;
+      --text-2:       #475569;
+      --text-3:       #94A3B8;
+      --font-d: 'Times New Roman', Times, serif;
+      --font-b: 'Inter', system-ui, sans-serif;
+      --font-m: 'DM Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-b); background: var(--bg); color: var(--text-1); min-height: 100vh; }
+
+    /* ── Header ── */
+    .hdr {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0.875rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .hdr-logo { font-family: var(--font-d); font-size: 1.35rem; color: var(--blue); letter-spacing: 0.01em; font-style: italic; }
+    .hdr-logo em { font-family: var(--font-b); font-style: normal; font-weight: 400; font-size: 0.75rem; color: var(--text-3); letter-spacing: 0.1em; text-transform: uppercase; margin-left: 0.65rem; }
+    .hdr-badge { font-size: 0.68rem; background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); padding: 0.2rem 0.6rem; border-radius: 2rem; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
+
+    /* ── Search ── */
+    .search-wrap { padding: 1.75rem 2rem 1.25rem; max-width: 920px; margin: 0 auto; }
+    .search-lbl { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-3); margin-bottom: 0.45rem; font-weight: 500; }
+    .search-row { display: flex; gap: 0.6rem; }
+    .search-input {
+      flex: 1; background: var(--surface); border: 1px solid var(--border-hi);
+      color: var(--text-1); font-family: var(--font-b); font-size: 0.95rem;
+      padding: 0.8rem 1.1rem; border-radius: 4px; outline: none; transition: border-color 0.15s;
+    }
+    .search-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .search-input::placeholder { color: var(--text-3); }
+    .search-btn {
+      background: var(--blue); color: #fff; border: none; padding: 0.8rem 1.6rem;
+      font-family: var(--font-b); font-weight: 500; font-size: 0.82rem;
+      letter-spacing: 0.05em; text-transform: uppercase; border-radius: 4px;
+      cursor: pointer; white-space: nowrap; transition: background 0.15s;
+    }
+    .search-btn:hover { background: var(--blue-dark); }
+    .search-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* ── Results shell ── */
+    .results { max-width: 920px; margin: 0 auto; padding: 0 2rem 3rem; }
+
+    /* ── Status ── */
+    .status-loading { display: flex; align-items: center; gap: 0.65rem; color: var(--text-2); font-size: 0.82rem; padding: 0.75rem 0; }
+    .spinner { width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.75s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .status-error { background: #FEF2F2; border: 1px solid #FECACA; color: #DC2626; padding: 0.65rem 1rem; border-radius: 4px; font-size: 0.82rem; }
+    .hidden { display: none !important; }
+
+    /* ── Property header ── */
+    .prop-hdr { padding-bottom: 1.25rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); }
+    .prop-addr { font-family: var(--font-d); font-size: 1.85rem; line-height: 1.2; margin-bottom: 0.3rem; color: var(--text-1); }
+    .prop-meta { color: var(--text-2); font-size: 0.8rem; display: flex; flex-wrap: wrap; gap: 1.25rem; }
+    .prop-meta-item { display: flex; align-items: center; gap: 0.35rem; }
+
+    /* ── Card ── */
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.1rem 1.25rem; }
+    .card-lbl {
+      font-size: 0.67rem; text-transform: uppercase; letter-spacing: 0.13em;
+      color: var(--text-3); margin-bottom: 0.9rem; font-weight: 600;
+      display: flex; align-items: center; gap: 0.45rem;
+    }
+    .card-lbl::before { content: ''; display: inline-block; width: 3px; height: 9px; background: var(--blue); border-radius: 1px; flex-shrink: 0; }
+
+    /* ── Grids ── */
+    .grid-main { display: grid; grid-template-columns: 1.55fr 1fr; gap: 0.9rem; margin-bottom: 0.9rem; }
+    .grid-right { display: flex; flex-direction: column; gap: 0.9rem; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; margin-bottom: 0.9rem; }
+    .mb { margin-bottom: 0.9rem; }
+
+    /* ── Map ── */
+    #map { height: 285px; border-radius: 4px; overflow: hidden; }
+
+    /* ── Risk ── */
+    .risk-badge {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.25rem 0.65rem; border-radius: 2rem; font-size: 0.76rem; font-weight: 500;
+      margin-bottom: 0.7rem;
+    }
+    .zone-x    { background: #F0FDF4; color: #15803D; border: 1px solid #BBF7D0; }
+    .zone-a    { background: #FFFBEB; color: #B45309; border: 1px solid #FDE68A; }
+    .zone-ve   { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+    .score-bar { display: flex; gap: 3px; margin-bottom: 0.8rem; }
+    .pip { flex: 1; height: 4px; border-radius: 2px; background: var(--border); }
+    .pip.on { background: var(--blue); }
+    .pip.on.red { background: #DC2626; }
+    .flag-list { list-style: none; display: flex; flex-direction: column; gap: 0.38rem; }
+    .flag { font-size: 0.78rem; color: var(--text-2); display: flex; align-items: flex-start; gap: 0.45rem; line-height: 1.45; }
+    .flag-arrow { color: var(--blue); flex-shrink: 0; }
+
+    /* ── Price ── */
+    .price-big { font-family: var(--font-d); font-size: 1.65rem; line-height: 1.1; margin-bottom: 0.18rem; color: var(--text-1); }
+    .price-sub { font-size: 0.75rem; color: var(--text-3); margin-bottom: 0.9rem; }
+    .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; }
+    .p-item-lbl { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); margin-bottom: 0.12rem; font-weight: 500; }
+    .p-item-val { font-family: var(--font-m); font-size: 0.85rem; color: var(--text-1); }
+    .eq-note { font-size: 0.68rem; color: var(--text-3); margin-top: 0.7rem; padding-top: 0.7rem; border-top: 1px solid var(--border); line-height: 1.55; }
+
+    /* ── Narrative ── */
+    .narrative { font-size: 0.9rem; color: var(--text-2); line-height: 1.85; font-style: italic; font-family: var(--font-d); }
+
+    /* ── Stat grid ── */
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; margin-bottom: 0.85rem; }
+    .stat-cell { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 0.55rem 0.7rem; }
+    .stat-lbl { font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); margin-bottom: 0.15rem; font-weight: 500; }
+    .stat-val { font-family: var(--font-m); font-size: 0.9rem; color: var(--text-1); }
+    .ind-list { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+    .ind-item { font-size: 0.78rem; color: var(--text-2); display: flex; align-items: center; gap: 0.45rem; }
+    .ind-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
+
+    /* ── Talking points ── */
+    .tp-list { list-style: none; display: flex; flex-direction: column; gap: 0.65rem; }
+    .tp { background: var(--blue-bg); border-left: 2px solid var(--blue); padding: 0.7rem 0.9rem; border-radius: 0 4px 4px 0; font-size: 0.845rem; color: var(--text-2); line-height: 1.6; }
+
+    @media (max-width: 660px) {
+      .grid-main, .grid-2 { grid-template-columns: 1fr; }
+      .prop-addr { font-size: 1.45rem; }
+      .hdr { padding: 0.875rem 1rem; }
+      .search-wrap, .results { padding-left: 1rem; padding-right: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-logo">REITool <em>New York Property Intelligence</em></div>
+  <div class="hdr-badge">MVP · v0.1</div>
+</header>
+
+<div class="search-wrap">
+  <div class="search-lbl">Property Address</div>
+  <div class="search-row">
+    <input class="search-input" id="addr" type="text"
+      placeholder="e.g. 30 Rockefeller Plaza, New York, NY 10112"
+      value="30 Rockefeller Plaza, New York, NY 10112">
+    <button class="search-btn" id="btn" onclick="analyze()">Analyze →</button>
+  </div>
+</div>
+
+<div class="results">
+
+  <div id="status-loading" class="status-loading hidden">
+    <div class="spinner"></div>
+    <span id="status-text">Fetching property data across 6 sources…</span>
+  </div>
+  <div id="status-error" class="status-error hidden"></div>
+
+  <div id="content">
+
+    <!-- Property header -->
+    <div class="prop-hdr">
+      <div class="prop-addr" id="r-address">30 Rockefeller Plaza</div>
+      <div class="prop-meta">
+        <span class="prop-meta-item">📍 <span id="r-city">New York, NY 10112</span></span>
+        <span class="prop-meta-item">🏢 <span id="r-class">Class A Office — Commercial</span></span>
+        <span class="prop-meta-item" id="r-coords-wrap">🌐 <span id="r-coords">40.7587° N, 73.9787° W</span></span>
+      </div>
+    </div>
+
+    <!-- Map + Risk + Price -->
+    <div class="grid-main">
+      <div class="card">
+        <div class="card-lbl">Property Location &amp; Census Block Group</div>
+        <div id="map"></div>
+      </div>
+      <div class="grid-right">
+        <!-- Risk -->
+        <div class="card">
+          <div class="card-lbl">Risk Assessment</div>
+          <span class="risk-badge zone-x" id="r-flood-badge">Zone X — Minimal Flood Risk</span>
+          <div class="score-bar" id="r-score-bar">
+            <div class="pip on"></div>
+            <div class="pip on"></div>
+            <div class="pip"></div>
+            <div class="pip"></div>
+            <div class="pip"></div>
+          </div>
+          <ul class="flag-list" id="r-flags">
+            <li class="flag"><span class="flag-arrow">→</span>Outside FEMA 100-year floodplain</li>
+            <li class="flag"><span class="flag-arrow">→</span>No proximate environmental hazards flagged</li>
+            <li class="flag"><span class="flag-arrow">→</span>Landmark district — modification restrictions apply</li>
+          </ul>
+        </div>
+        <!-- Price -->
+        <div class="card">
+          <div class="card-lbl">Valuation</div>
+          <div class="price-big" id="r-fmv">$847,000,000</div>
+          <div class="price-sub">Full Market Value (ORPTS)</div>
+          <div class="price-grid">
+            <div>
+              <div class="p-item-lbl">Assessed Value</div>
+              <div class="p-item-val" id="r-assessed">$381,150,000</div>
+            </div>
+            <div>
+              <div class="p-item-lbl">Building Sq Ft</div>
+              <div class="p-item-val" id="r-sqft">2,163,000</div>
+            </div>
+            <div>
+              <div class="p-item-lbl">Price / Sq Ft</div>
+              <div class="p-item-val" id="r-ppsf">$391.58</div>
+            </div>
+            <div>
+              <div class="p-item-lbl">Year Built</div>
+              <div class="p-item-val" id="r-year">1933</div>
+            </div>
+          </div>
+          <div class="eq-note" id="r-eq-note">⚠ Assessed values reflect municipal equalization rates. Cross-municipality comparisons require normalization via ORPTS equalization table.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Narrative -->
+    <div class="card mb">
+      <div class="card-lbl">Property Overview</div>
+      <p class="narrative" id="r-narrative">30 Rockefeller Plaza is a landmark Class A office tower in Midtown Manhattan, offering approximately 2.16M square feet of premium commercial space with an assessed full market value of $847M. Located in FEMA Flood Zone X, the property carries minimal flood exposure, though its designation within the Rockefeller Center landmark district introduces regulatory constraints on physical modifications. The surrounding Midtown Census block group reflects exceptionally high median household income ($143,200) and near-zero residential vacancy, indicating strong area economic health and sustained demand for commercial tenancy. New York County employment trends show 2.3% year-over-year growth led by finance, professional services, and media — the core sectors comprising this building's historical tenancy profile.</p>
+    </div>
+
+    <!-- Location + Market -->
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-lbl">Location Quality — Block Group</div>
+        <div class="stat-grid">
+          <div class="stat-cell"><div class="stat-lbl">Median HH Income</div><div class="stat-val" id="r-income">$143,200</div></div>
+          <div class="stat-cell"><div class="stat-lbl">Vacancy Rate</div><div class="stat-val" id="r-vacancy">3.2%</div></div>
+          <div class="stat-cell"><div class="stat-lbl">Renter Pct</div><div class="stat-val" id="r-renter">74.1%</div></div>
+          <div class="stat-cell"><div class="stat-lbl">Pop. Trend</div><div class="stat-val" id="r-pop">+1.8% YoY</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-lbl">Market Context — <span id="r-county">New York County</span></div>
+        <div class="stat-grid">
+          <div class="stat-cell"><div class="stat-lbl">Total Employment</div><div class="stat-val" id="r-emp">2.84M</div></div>
+          <div class="stat-cell"><div class="stat-lbl">YoY Trend</div><div class="stat-val" id="r-emp-trend">+2.3%</div></div>
+        </div>
+        <ul class="ind-list" id="r-industries">
+          <li class="ind-item"><div class="ind-dot"></div>Finance &amp; Insurance</li>
+          <li class="ind-item"><div class="ind-dot"></div>Professional &amp; Business Services</li>
+          <li class="ind-item"><div class="ind-dot"></div>Information &amp; Media</li>
+          <li class="ind-item"><div class="ind-dot"></div>Healthcare &amp; Social Assistance</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Talking points -->
+    <div class="card">
+      <div class="card-lbl">Broker Talking Points</div>
+      <ul class="tp-list" id="r-talking-points">
+        <li class="tp">The $391/SF assessed price-per-square-foot is competitive for Midtown Class A — comparable properties in the Rockefeller Center submarket trade at $420–$480/SF, suggesting room for value appreciation with any lease restructuring or capital improvement program.</li>
+        <li class="tp">FEMA Zone X designation is a meaningful differentiator: many comparable Midtown assets near the Hudson carry moderate flood exposure (Zone AE). This property's risk profile is favorable for both insurance cost benchmarking and long-term financing terms.</li>
+        <li class="tp">New York County's 2.3% employment growth — driven by finance and professional services — directly supports Class A office absorption. Leasing velocity in this submarket has outpaced broader Manhattan averages for three consecutive quarters.</li>
+        <li class="tp">Landmark designation creates a durable supply constraint: no new comparable product can be introduced to this exact submarket, reinforcing the asset's scarcity premium as a talking point in client negotiations.</li>
+      </ul>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /results -->
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ─── Map init (mock: 30 Rock) ───────────────────────────────────────────────
+const map = L.map('map', { zoomControl: true, scrollWheelZoom: false })
+             .setView([40.7587, -73.9787], 16);
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; CartoDB', maxZoom: 19
+}).addTo(map);
+
+const blueIcon = L.divIcon({
+  className: '',
+  html: '<div style="width:12px;height:12px;background:#2563EB;border:2px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgba(37,99,235,0.4)"></div>',
+  iconSize: [12,12], iconAnchor: [6,6]
+});
+
+let marker = L.marker([40.7587, -73.9787], { icon: blueIcon }).addTo(map);
+let bgLayer = L.geoJSON({
+  type: 'Feature',
+  geometry: {
+    type: 'Polygon',
+    coordinates: [[
+      [-73.982, 40.756], [-73.982, 40.761],
+      [-73.975, 40.761], [-73.975, 40.756],
+      [-73.982, 40.756]
+    ]]
+  }
+}, { style: { color: '#2563EB', weight: 1.5, fillOpacity: 0.07, fillColor: '#2563EB' } }).addTo(map);
+
+// ─── Render helpers ──────────────────────────────────────────────────────────
+function fmt(n) { return n == null ? 'N/A' : Number(n).toLocaleString('en-US'); }
+function fmtUSD(n) { return n == null ? 'N/A' : '$' + Number(n).toLocaleString('en-US'); }
+function fmtPct(n) { return n == null ? 'N/A' : (n * 100).toFixed(1) + '%'; }
+
+function renderResults(d) {
+  const s = d.sections;
+
+  // Header
+  const addrParts = d.resolved_address.split(',');
+  document.getElementById('r-address').textContent = addrParts[0];
+  document.getElementById('r-city').textContent = addrParts.slice(1).join(',').trim();
+  document.getElementById('r-coords').textContent =
+    `${Math.abs(d.coordinates.lat).toFixed(4)}° ${d.coordinates.lat >= 0 ? 'N' : 'S'}, ` +
+    `${Math.abs(d.coordinates.lon).toFixed(4)}° ${d.coordinates.lon >= 0 ? 'E' : 'W'}`;
+  document.getElementById('r-class').textContent = s.price?.property_class || '—';
+
+  // Map
+  const lat = d.coordinates.lat, lon = d.coordinates.lon;
+  map.setView([lat, lon], 16);
+  marker.setLatLng([lat, lon]);
+  marker.setIcon(blueIcon);
+  if (s.location_quality?.block_group_geometry) {
+    map.removeLayer(bgLayer);
+    bgLayer = L.geoJSON(s.location_quality.block_group_geometry, {
+      style: { color: '#2563EB', weight: 1.5, fillOpacity: 0.07, fillColor: '#2563EB' }
+    }).addTo(map);
+  }
+  if (s.property_facts?.parcel_geometry) {
+    L.geoJSON(s.property_facts.parcel_geometry, {
+      style: { color: '#1D4ED8', weight: 1, fillOpacity: 0.05, fillColor: '#1D4ED8' }
+    }).addTo(map);
+  }
+
+  // Risk
+  const fz = s.risk?.flood_zone || 'Unknown';
+  const badge = document.getElementById('r-flood-badge');
+  badge.textContent = `Zone ${fz} — ${s.risk?.flood_zone_description || ''}`;
+  badge.className = 'risk-badge ' + (fz === 'X' ? 'zone-x' : fz.startsWith('V') ? 'zone-ve' : 'zone-a');
+  const score = s.risk?.risk_score || 3;
+  const pips = document.getElementById('r-score-bar').querySelectorAll('.pip');
+  pips.forEach((p, i) => {
+    p.className = 'pip' + (i < score ? ' on' + (score >= 4 ? ' red' : '') : '');
+  });
+  const flagsEl = document.getElementById('r-flags');
+  flagsEl.innerHTML = (s.risk?.risk_flags || []).map(f =>
+    `<li class="flag"><span class="flag-arrow">→</span>${f}</li>`).join('');
+
+  // Price
+  document.getElementById('r-fmv').textContent      = fmtUSD(s.price?.full_market_value);
+  document.getElementById('r-assessed').textContent = fmtUSD(s.price?.assessed_value);
+  document.getElementById('r-sqft').textContent     = fmt(d.property_facts?.building_sqft);
+  document.getElementById('r-ppsf').textContent     = s.price?.price_per_sqft ? '$' + Number(s.price.price_per_sqft).toFixed(2) : 'N/A';
+  document.getElementById('r-year').textContent     = d.property_facts?.year_built || '—';
+
+  // Narrative + talking points
+  document.getElementById('r-narrative').textContent = d.narrative || '';
+  document.getElementById('r-talking-points').innerHTML =
+    (d.talking_points || []).map(t => `<li class="tp">${t}</li>`).join('');
+
+  // Location
+  document.getElementById('r-income').textContent  = fmtUSD(s.location_quality?.median_household_income);
+  document.getElementById('r-vacancy').textContent = fmtPct(s.location_quality?.vacancy_rate);
+  document.getElementById('r-renter').textContent  = fmtPct(s.location_quality?.renter_pct);
+  document.getElementById('r-pop').textContent     = s.location_quality?.population_trend || '—';
+
+  // Market
+  document.getElementById('r-county').textContent    = s.market_context?.county || '—';
+  document.getElementById('r-emp').textContent       = fmt(s.market_context?.total_employment);
+  document.getElementById('r-emp-trend').textContent = s.market_context?.employment_trend || '—';
+  document.getElementById('r-industries').innerHTML  =
+    (s.market_context?.dominant_industries || []).map(i =>
+      `<li class="ind-item"><div class="ind-dot"></div>${i}</li>`).join('');
+}
+
+// ─── API call ────────────────────────────────────────────────────────────────
+async function analyze() {
+  const address = document.getElementById('addr').value.trim();
+  if (!address) return;
+
+  const btn     = document.getElementById('btn');
+  const loading = document.getElementById('status-loading');
+  const errEl   = document.getElementById('status-error');
+
+  btn.disabled = true;
+  loading.classList.remove('hidden');
+  errEl.classList.add('hidden');
+
+  // ── LIVE MODE ────────────────────────────────────────────────────────────────
+  try {
+    const steps = ['Geocoding address…', 'Fetching ORPTS + Census data…',
+                   'Querying FEMA flood zones…', 'Pulling BLS employment data…',
+                   'Synthesizing briefing…'];
+    let i = 0;
+    const ticker = setInterval(() => {
+      document.getElementById('status-text').textContent = steps[Math.min(i++, steps.length-1)];
+    }, 2000);
+    const res = await fetch('/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address })
+    });
+    clearInterval(ticker);
+    if (!res.ok) {
+      const detail = await res.json().catch(() => ({}));
+      throw new Error(detail.detail || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    renderResults(data);
+  } catch (err) {
+    errEl.textContent = `Error: ${err.message}`;
+    errEl.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    loading.classList.add('hidden');
+  }
+}
+
+document.getElementById('addr').addEventListener('keydown', e => { if (e.key === 'Enter') analyze(); });
+</script>
+</body>
+</html>

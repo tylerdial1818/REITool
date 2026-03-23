@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import json
+import logging
 
 from openai import AsyncOpenAI
+
+logger = logging.getLogger("reitool.synthesis")
 
 from app.core.config import get_settings
 
@@ -93,6 +96,20 @@ async def synthesize_briefing(context_data: dict) -> dict:
         ],
         response_format={"type": "json_object"},
     )
+
+    # Log token usage and estimated cost (gpt-4o: $5/1M input, $15/1M output)
+    usage = response.usage
+    if usage:
+        est_cost = (usage.prompt_tokens * 5.0 / 1_000_000) + (
+            usage.completion_tokens * 15.0 / 1_000_000
+        )
+        logger.info(
+            "OpenAI usage: input=%d output=%d total=%d est_cost=$%.4f",
+            usage.prompt_tokens,
+            usage.completion_tokens,
+            usage.total_tokens,
+            est_cost,
+        )
 
     raw_text = response.choices[0].message.content
 
