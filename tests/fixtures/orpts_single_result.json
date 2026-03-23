@@ -1,0 +1,21 @@
+[
+  {
+    "print_key_code": "1-00076-0001",
+    "county_name": "NEW YORK",
+    "muni_name": "NEW YORK",
+    "parcel_addr": "30 ROCKEFELLER PLZ",
+    "full_market_val": "850000000",
+    "assessed_val": "382500000",
+    "property_class_code": "410",
+    "property_class_desc": "Living accomodations",
+    "year_built": "1933",
+    "sq_footage": "850000",
+    "total_av": "382500000",
+    "land_av": "127500000",
+    "roll_yr": "2025",
+    "owner_name": "ROCKEFELLER CENTER INC",
+    "equalization_rate": "45.00",
+    "swis_code": "360100",
+    "school_name": "NEW YORK CITY"
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "result": {
+    "input": {
+      "address": {
+        "address": "99999 Nonexistent St, Faketown, NY 00000"
+      },
+      "benchmark": {
+        "benchmarkName": "Public_AR_Current",
+        "benchmarkDescription": "Public Address Ranges - Current Benchmark",
+        "id": "4",
+        "isDefault": true
+      }
+    },
+    "addressMatches": []
+  }
+}

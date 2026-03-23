@@ -1,0 +1,61 @@
+{
+  "result": {
+    "input": {
+      "address": {
+        "address": "30 Rockefeller Plaza, New York, NY 10112"
+      },
+      "benchmark": {
+        "benchmarkName": "Public_AR_Current",
+        "benchmarkDescription": "Public Address Ranges - Current Benchmark",
+        "id": "4",
+        "isDefault": true
+      }
+    },
+    "addressMatches": [
+      {
+        "matchedAddress": "30 ROCKEFELLER PLZ, NEW YORK, NY, 10112",
+        "coordinates": {
+          "x": -73.978674,
+          "y": 40.758896
+        },
+        "tigerLine": {
+          "tigerLineId": "59653218",
+          "side": "L"
+        },
+        "addressComponents": {
+          "fromAddress": "2",
+          "toAddress": "98",
+          "preQualifier": "",
+          "preDirection": "",
+          "preType": "",
+          "streetName": "ROCKEFELLER",
+          "suffixType": "PLZ",
+          "suffixDirection": "",
+          "suffixQualifier": "",
+          "city": "NEW YORK",
+          "state": "NY",
+          "zip": "10112"
+        },
+        "geographies": {
+          "Census Blocks": [
+            {
+              "GEOID": "360610076001000",
+              "CENTLAT": "+40.7590822",
+              "CENTLON": "-073.9787068",
+              "BLOCK": "1000",
+              "BLKGRP": "1",
+              "TRACT": "007600",
+              "COUNTY": "061",
+              "STATE": "36",
+              "BASENAME": "1000",
+              "NAME": "Block 1000",
+              "FUNCSTAT": "S",
+              "LSADC": "BK",
+              "OBJECTID": 1234567
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

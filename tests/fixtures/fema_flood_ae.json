@@ -1,0 +1,25 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 12345,
+        "FLD_AR_ID": "36061C0001F",
+        "FLD_ZONE": "AE",
+        "FLOODWAY": "FLOODWAY",
+        "SFHA_TF": "T",
+        "STATIC_BFE": 12.0,
+        "DEPTH": null,
+        "VELOCITY": null,
+        "LEN_UNIT": "FEET",
+        "SOURCE_CIT": "36061CV001B",
+        "STUDY_TYP": "NP"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-73.98, 40.76], [-73.97, 40.76], [-73.97, 40.75], [-73.98, 40.75], [-73.98, 40.76]]]
+      }
+    }
+  ]
+}
