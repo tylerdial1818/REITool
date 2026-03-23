@@ -80,8 +80,8 @@ async def analyze(payload: AddressInput):
     # Step 4: Synthesis
     try:
         briefing = await synthesize_briefing(context)
-    except (ValueError, Exception) as e:
-        logger.error(f"Synthesis failed: {e}")
+    except Exception as e:
+        logger.error("Synthesis failed: %s", e)
         raise HTTPException(500, detail=f"Synthesis failed: {str(e)}")
 
     # Step 5: Return — add input_address and coordinates
