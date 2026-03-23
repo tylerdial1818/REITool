@@ -19,7 +19,7 @@ def load_fixture(name: str) -> dict | list:
 
 
 @pytest.fixture
-def mock_client():
+async def mock_client():
     """Provide a respx-mocked httpx.AsyncClient for fetcher tests."""
     with respx.mock(assert_all_called=False) as respx_mock:
         async with httpx.AsyncClient() as client:

@@ -425,10 +425,14 @@ async def test_pluto_timeout():  # F-062
     assert result is None
 
 
+@respx.mock
 async def test_pluto_nyc_fips_gate():  # F-063
-    for fips in NYC_FIPS:
-        # Should not raise or skip for NYC FIPS codes
-        assert fips in NYC_FIPS
+    fixture = load_fixture("pluto_parcel")
+    respx.get(url__startswith=PLUTO_URL).mock(return_value=httpx.Response(200, json=fixture))
+    async with httpx.AsyncClient() as client:
+        for fips in NYC_FIPS:
+            result = await fetch_pluto(client, county_fips=fips, address="30 Rockefeller Plaza")
+            assert result is not None, f"fetch_pluto returned None for NYC FIPS {fips}"
 
 
 @respx.mock

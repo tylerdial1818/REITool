@@ -144,7 +144,7 @@ async def test_analyze_nyc_includes_pluto():  # A-003
             for p in patches:
                 p.stop()
     assert resp.status_code == 200
-    assert pluto_mock.new.called or pluto_mock.new.call_count >= 0  # pluto was invoked
+    assert pluto_mock.new.called  # pluto was invoked
 
 
 async def test_analyze_non_nyc_excludes_pluto():  # A-004
