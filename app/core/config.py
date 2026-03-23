@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     census_api_key: str
     bls_api_key: str
-    anthropic_api_key: str
+    openai_api_key: str
     fetcher_timeout_seconds: int = 8
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

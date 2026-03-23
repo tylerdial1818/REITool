@@ -1,10 +1,10 @@
-"""Claude-powered synthesis module for generating structured property briefings."""
+"""OpenAI-powered synthesis module for generating structured property briefings."""
 
 from __future__ import annotations
 
 import json
 
-import anthropic
+from openai import AsyncOpenAI
 
 from app.core.config import get_settings
 
@@ -61,7 +61,7 @@ If flood data is missing, default to 3.\
 
 
 async def synthesize_briefing(context_data: dict) -> dict:
-    """Call Claude to produce a structured property briefing.
+    """Call OpenAI to produce a structured property briefing.
 
     Parameters
     ----------
@@ -80,22 +80,25 @@ async def synthesize_briefing(context_data: dict) -> dict:
         If the model response cannot be parsed as valid JSON.
     """
     settings = get_settings()
-    client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
+    client = AsyncOpenAI(api_key=settings.openai_api_key)
 
     user_msg = json.dumps(context_data, default=str)
 
-    response = await client.messages.create(
-        model="claude-sonnet-4-5",
+    response = await client.chat.completions.create(
+        model="gpt-4o",
         max_tokens=2048,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": user_msg}],
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_msg},
+        ],
+        response_format={"type": "json_object"},
     )
 
-    raw_text = response.content[0].text
+    raw_text = response.choices[0].message.content
 
     try:
         return json.loads(raw_text)
     except json.JSONDecodeError as exc:
         raise ValueError(
-            f"Claude returned invalid JSON: {raw_text}"
+            f"OpenAI returned invalid JSON: {raw_text}"
         ) from exc
