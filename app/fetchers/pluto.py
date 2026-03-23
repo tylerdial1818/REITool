@@ -25,7 +25,7 @@ async def fetch_pluto(
 
     url = "https://data.cityofnewyork.us/resource/64uk-42ks.geojson"
     params = {
-        "$where": f"upper(address) LIKE '%{address.upper()}%'",
+        "$where": f"upper(address) LIKE '%{address.upper().replace(chr(39), chr(39)+chr(39))}%'",
         "$limit": "1",
     }
 

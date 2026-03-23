@@ -73,8 +73,16 @@ async def fetch_census_acs(
             row.get("B25003_003E"), row.get("B25003_001E")
         )
 
+        # Census uses -666666666 as a suppression sentinel
+        try:
+            income_val = int(median_hh_income) if median_hh_income not in (None, "") else None
+            if income_val is not None and income_val < 0:
+                income_val = None
+        except (ValueError, TypeError):
+            income_val = None
+
         return {
-            "median_hh_income": int(median_hh_income) if median_hh_income not in (None, "") else None,
+            "median_hh_income": income_val,
             "vacancy_rate": vacancy_rate,
             "renter_pct": renter_pct,
         }

@@ -53,12 +53,16 @@ async def fetch_orpts(
         logger.warning("Could not parse street name from %r", resolved_address)
         return None
 
+    # Escape single quotes to prevent SoQL injection
+    safe_street = street_name.replace("'", "''")
+    safe_house = house_number.replace("'", "''")
     where_clause = (
-        f"upper(street_name) = '{street_name}' "
-        f"AND house_number = '{house_number}'"
+        f"upper(street_name) = '{safe_street}' "
+        f"AND house_number = '{safe_house}'"
     )
     if muni_name:
-        where_clause += f" AND upper(muni_name) = '{muni_name}'"
+        safe_muni = muni_name.replace("'", "''")
+        where_clause += f" AND upper(muni_name) = '{safe_muni}'"
 
     params = {
         "$where": where_clause,
